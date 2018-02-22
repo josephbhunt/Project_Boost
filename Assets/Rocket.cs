@@ -6,22 +6,41 @@ using UnityEngine;
 public class Rocket : MonoBehaviour {
     Rigidbody rigidbody;
     AudioSource audioSource;
-	// Use this for initialization
-	void Start () {
+    [SerializeField] float rcsThrust = 200f;
+    [SerializeField] float mainThrust = 120f;
+
+    // Use this for initialization
+    void Start() {
         rigidbody = GetComponent<Rigidbody>();
         audioSource = GetComponent<AudioSource>();
 	}
-	
-	// Update is called once per frame
-	void Update () {
-        ProcessInput();
-	}
 
-    private void ProcessInput()
+    // Update is called once per frame
+    void Update()
     {
+        Thrust();
+        Rotate();
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        switch (collision.gameObject.tag)
+        {
+            case "Friendly":
+                print("OK");
+                break;
+            default:
+                print("dead");
+                break;
+        }
+    }
+
+    private void Thrust()
+    {
+        float thrustThisFrame = mainThrust * Time.deltaTime;
         if (Input.GetKey(KeyCode.Space))
         {
-            rigidbody.AddRelativeForce(Vector3.up);
+            rigidbody.AddRelativeForce(Vector3.up * thrustThisFrame);
             if (!audioSource.isPlaying)
             {
                 audioSource.Play();
@@ -31,13 +50,20 @@ public class Rocket : MonoBehaviour {
         {
             audioSource.Stop();
         }
+    }
+
+    private void Rotate()
+    {
+        float rotationThisFrame = rcsThrust * Time.deltaTime;
+        rigidbody.freezeRotation = true;
         if (Input.GetKey(KeyCode.A) && !Input.GetKey(KeyCode.S))
         {
-            transform.Rotate(Vector3.forward);
+            transform.Rotate(Vector3.forward * rotationThisFrame);
         }
-        else if(Input.GetKey(KeyCode.S) && !Input.GetKey(KeyCode.A))
+        else if (Input.GetKey(KeyCode.S) && !Input.GetKey(KeyCode.A))
         {
-            transform.Rotate(Vector3.back);
+            transform.Rotate(Vector3.back * rotationThisFrame);
         }
+        rigidbody.freezeRotation = false;
     }
 }
