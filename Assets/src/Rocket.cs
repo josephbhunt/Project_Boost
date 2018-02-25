@@ -4,6 +4,8 @@ using UnityEngine.SceneManagement;
 public class Rocket : MonoBehaviour {
     new Rigidbody rigidbody;
     AudioSource audioSource;
+    Light exhaustLight;
+    GameObject exhaustLightObject;
 
     [SerializeField] float rcsThrust = 200f;
     [SerializeField] float mainThrust = 120f;
@@ -22,6 +24,9 @@ public class Rocket : MonoBehaviour {
     void Start() {
         rigidbody = GetComponent<Rigidbody>();
         audioSource = GetComponent<AudioSource>();
+        exhaustLight = GetComponentInChildren<Light>();
+        exhaustLightObject = exhaustLight.gameObject;
+        exhaustLightObject.SetActive(false);
     }
 
     // Update is called once per frame
@@ -74,16 +79,19 @@ public class Rocket : MonoBehaviour {
     private void LoadNextScene()
     {
         Scene currentLevel = SceneManager.GetActiveScene();
-        Scene levelTwo = SceneManager.GetSceneByName("Level 2");
         int currentLevelIndex = currentLevel.buildIndex;
 
-        if (currentLevel.Equals(levelTwo))
+        if(state == State.Winning)
         {
-            SceneManager.LoadScene(1);
-        }
-        else if(state == State.Winning)
-        {
-            SceneManager.LoadScene(currentLevelIndex + 1);
+            print(SceneManager.sceneCountInBuildSettings);
+            if (currentLevelIndex == SceneManager.sceneCountInBuildSettings - 1)
+            {
+                SceneManager.LoadScene(0);
+            }
+            else
+            {
+                SceneManager.LoadScene(currentLevelIndex + 1);
+            }
         }
         else
         {
@@ -97,11 +105,13 @@ public class Rocket : MonoBehaviour {
         if (Input.GetKey(KeyCode.Space))
         {
             ApplyThrust(thrustThisFrame);
+            exhaustLightObject.SetActive(true);
         }
         else
         {
             audioSource.Stop();
             mainEngineParticles.Stop();
+            exhaustLightObject.SetActive(false);
         }
     }
 
