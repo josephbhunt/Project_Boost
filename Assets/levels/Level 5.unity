@@ -511,8 +511,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdea0cf9312b9f74fa865132db5e3e35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rotation: {x: 50, y: 50, z: 0, w: 0}
-  period: 4
+  rotation: {x: 0, y: 5, z: 0, w: 0}
+  period: 6
 --- !u!1001 &1037025393
 Prefab:
   m_ObjectHideFlags: 0
