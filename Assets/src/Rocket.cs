@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Rocket : MonoBehaviour {
@@ -6,6 +7,7 @@ public class Rocket : MonoBehaviour {
     AudioSource audioSource;
     Light exhaustLight;
     GameObject exhaustLightObject;
+    Boolean collisionOn = true;
 
     [SerializeField] float rcsThrust = 200f;
     [SerializeField] float mainThrust = 120f;
@@ -37,11 +39,35 @@ public class Rocket : MonoBehaviour {
             RespondToThrustInput();
             RespondToRotateInput();
         }
+        if (Debug.isDebugBuild)
+        {
+            ActOnDebugKeys();
+        }
+    }
+
+    private void ActOnDebugKeys()
+    {
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            AdvanceLevel();
+        }
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            if (collisionOn)
+            {
+                collisionOn = false;
+            }
+            else
+            {
+                collisionOn = true;
+            }
+            
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if(state != State.Alive)
+        if (state != State.Alive || !collisionOn)
         {
             return;
         }
@@ -78,25 +104,33 @@ public class Rocket : MonoBehaviour {
 
     private void LoadNextScene()
     {
-        Scene currentLevel = SceneManager.GetActiveScene();
-        int currentLevelIndex = currentLevel.buildIndex;
-
-        if(state == State.Winning)
+        if (state == State.Winning)
         {
-            print(SceneManager.sceneCountInBuildSettings);
-            if (currentLevelIndex == SceneManager.sceneCountInBuildSettings - 1)
-            {
-                SceneManager.LoadScene(0);
-            }
-            else
-            {
-                SceneManager.LoadScene(currentLevelIndex + 1);
-            }
+            AdvanceLevel();
         }
         else
         {
-            SceneManager.LoadScene(currentLevelIndex);
+            SceneManager.LoadScene(CurrentLevelIndex());
         }
+    }
+
+    private void AdvanceLevel()
+    {
+        if (CurrentLevelIndex() == SceneManager.sceneCountInBuildSettings - 1)
+        {
+            SceneManager.LoadScene(0);
+        }
+        else
+        {
+            SceneManager.LoadScene(CurrentLevelIndex() + 1);
+        }
+    }
+
+    private int CurrentLevelIndex()
+    {
+        Scene currentLevel = SceneManager.GetActiveScene();
+        int currentLevelIndex = currentLevel.buildIndex;
+        return currentLevelIndex;
     }
 
     private void RespondToThrustInput()
